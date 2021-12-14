@@ -7,7 +7,7 @@ dnf -y install nginx
 systemctl start nginx
 systemctl enable nginx
 
-dnf install -y php php-mysqlnd php-fpm php-opcache php-gd php-xml php-mbstring php-json
+dnf install -y php php-mysqlnd php-fpm php-opcache php-gd php-xml php-mbstring php-json php-cli php-zip
 
 systemctl start php-fpm
 systemctl enable php-fpm
