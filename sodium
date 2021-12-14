@@ -1,0 +1,10 @@
+#!/bin/bash
+
+yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
+  && yum install -y php-cli libsodium \
+  && yum install -y php-pear php-devel libsodium-devel make \
+  && pecl channel-update pecl.php.net \
+  && pecl install libsodium \
+  && yum remove -y php-pear php-devel libsodium-devel make \
+  && echo 'extension=sodium.so' > /etc/php.d/20-sodium.ini \
+  && php -i | grep sodium
