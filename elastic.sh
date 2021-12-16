@@ -189,10 +189,3 @@ echo
 echo
 echo
 echo 
-GREENTXT "~    REPOSITORIES AND PACKAGES INSTALLATION IS COMPLETED    ~"
-WHITETXT "-------------------------------------------------------------------------------------"
-echo
-echo
-pause '[] Press [Enter] key to show the menu'
-printf "\033c"
-;;
