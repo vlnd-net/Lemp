@@ -308,15 +308,6 @@ fi
 # install packages to run CPU and HDD test
 dpkg-query -l curl time bc bzip2 tar >/dev/null || { echo; echo; apt update -o Acquire::ForceIPv4=true; apt -y install curl time bc bzip2 tar; }
 
-fi
-
-
-###################################################################################
-###                                  WEBMIN INSTALLATION                        ###
-###################################################################################
-"webmin")
-echo ""
-echo ""
 _echo "[?] Install Webmin Control Panel ? [y/n][n]: "
 DOMAIN=$(${SQLITE3} "SELECT domain FROM magento LIMIT 1;")
 OWNER=$(${SQLITE3} "SELECT owner FROM magento LIMIT 1;")
@@ -361,26 +352,3 @@ if [ "$?" = 0 ]; then
   YELLOWTXT "[!] Password: ${WEBMIN_PASSWORD}"
   echo ""
   REDTXT "[!] PLEASE ENABLE TWO-FACTOR AUTHENTICATION!"
-  
-  ${SQLITE3} "UPDATE system SET webmin_password = '${WEBMIN_PASSWORD}';"
-  else
-   echo
-   REDTXT "Webmin installation error"
-  fi
-  else
-   echo
-   YELLOWTXT "Webmin installation was skipped by user input."
-fi
-echo
-echo
-pause '[] Press [Enter] key to show menu'
-echo
-;;
-"exit")
-REDTXT "[!] Exit"
-exit
-;;
-
-###################################################################################
-###                             CATCH ALL MENU - THE END                        ###
-###################################################################################
