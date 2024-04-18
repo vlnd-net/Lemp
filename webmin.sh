@@ -152,9 +152,7 @@ else
     if [ "${distro_detect}" = "y" ]; then
       echo ""
       GREENTXT "PASS: [ ${DISTRO_NAME} ${DISTRO_VERSION} ]"
-      # Get machine id
-      MACHINE_ID="$(cat /etc/machine-id)"
-      ${SQLITE3} "INSERT INTO system (machine_id, distro_name, distro_version) VALUES ('${MACHINE_ID}', '${DISTRO_NAME}', '${DISTRO_VERSION}');"
+      
     else
       distro_error
     fi
@@ -181,7 +179,24 @@ fi
 # install packages to run CPU and HDD test
 dpkg-query -l curl time bc bzip2 tar >/dev/null || { echo; echo; apt update -o Acquire::ForceIPv4=true; apt -y install curl time bc bzip2 tar; }
 
-
+echo
+echo
+pause '[] Press [Enter] key to show menu'
+printf "\033c"
+;;
+###################################################################################
+###                                  WEBMIN INSTALLATION                        ###
+###################################################################################
+"webmin")
+echo ""
+echo ""
+_echo "[?] Install Webmin Control Panel ? [y/n][n]: "
+DOMAIN=$(${SQLITE3} "SELECT domain FROM magento LIMIT 1;")
+OWNER=$(${SQLITE3} "SELECT owner FROM magento LIMIT 1;")
+ADMIN_EMAIL=$(${SQLITE3} "SELECT admin_email FROM magento LIMIT 1;")
+read webmin_install
+if [ "${webmin_install}" == "y" ];then
+ echo ""
  YELLOWTXT "Webmin installation:"
  echo ""
  curl -s -O https://raw.githubusercontent.com/webmin/webmin/master/setup-repos.sh
