@@ -1,56 +1,12 @@
 #!/bin/bash
-#=================================================================================#
-#        MagenX e-commerce stack for Magento 2                                    #
-#        Copyright (C) 2013-present admin@magenx.com                              #
-#        All rights reserved.                                                     #
-#=================================================================================#
-SELF=$(basename $0)
-MAGENX_VERSION=$(curl -s https://api.github.com/repos/magenx/Magento-2-server-installation/tags 2>&1 | head -3 | grep -oP '(?<=")\d.*(?=")')
-MAGENX_BASE="https://magenx.sh"
-###################################################################################
-###                              REPOSITORY AND PACKAGES                        ###
-###################################################################################
 
-# Github installation repository raw url
-MAGENX_INSTALL_GITHUB_REPO="https://raw.githubusercontent.com/magenx/Magento-2-server-installation/master"
 
-# Magento
-VERSION_LIST=$(curl -s https://api.github.com/repos/magento/magento2/tags 2>&1 | grep -oP '(?<=name": ").*(?=")' | sort -r)
-PROJECT="composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition"
-
-COMPOSER_NAME="8c681734f22763b50ea0c29dff9e7af2" 
-COMPOSER_PASSWORD="02dfee497e669b5db1fe1c8d481d6974" 
-
-## Version lock
-COMPOSER_VERSION="2.2"
-RABBITMQ_VERSION="3.12*"
-MARIADB_VERSION="10.11"
-ELASTICSEARCH_VERSION="7.x"
-VARNISH_VERSION="73"
-REDIS_VERSION="7"
-NODE_VERSION="18"
-NVM_VERSION="0.39.7"
-
-# Repositories
-MARIADB_REPO_CONFIG="https://downloads.mariadb.com/MariaDB/mariadb_repo_setup"
-
-# Nginx configuration
-NGINX_VERSION=$(curl -s http://nginx.org/en/download.html | grep -oP '(?<=gz">nginx-).*?(?=</a>)' | head -1)
-MAGENX_NGINX_GITHUB_REPO="https://raw.githubusercontent.com/magenx/Magento-nginx-config/master/"
-MAGENX_NGINX_GITHUB_REPO_API="https://api.github.com/repos/magenx/Magento-nginx-config/contents/magento2"
-
-# Debug Tools
-MYSQL_TUNER="https://raw.githubusercontent.com/major/MySQLTuner-perl/master/mysqltuner.pl"
 
 # Malware detector
 MALDET="https://www.rfxn.com/downloads/maldetect-current.tar.gz"
 
 # WebStack Packages .deb
 WEB_STACK_CHECK="mysql* rabbitmq* elasticsearch opensearch percona-server* maria* php* nginx* ufw varnish* certbot* redis* webmin"
-
-EXTRA_PACKAGES="curl jq gnupg2 auditd apt-transport-https apt-show-versions ca-certificates lsb-release make autoconf snapd automake libtool uuid-runtime \
-perl openssl unzip screen nfs-common inotify-tools iptables smartmontools mlocate vim wget sudo apache2-utils \
-logrotate git netcat-openbsd patch ipset postfix strace rsyslog geoipupdate moreutils lsof sysstat acl attr iotop expect imagemagick snmp"
 
 PERL_MODULES="liblwp-protocol-https-perl libdbi-perl libconfig-inifiles-perl libdbd-mysql-perl libterm-readkey-perl"
 
@@ -151,88 +107,6 @@ else
   GREENTXT "PASS: ROOT!"
 fi
 
-# Config path
-MAGENX_CONFIG_PATH="/opt/magenx/config"
-if [ ! -d "${MAGENX_CONFIG_PATH}" ]; then
-  mkdir -p ${MAGENX_CONFIG_PATH}
-fi
-
-# SQLite check, create database path and command
-if ! which sqlite3 >/dev/null; then
-  echo ""
-  YELLOWTXT "[!] SQLite is not installed on this system!"
-  YELLOWTXT "[!] Installing..."
-  echo ""
-  echo ""
-  apt update
-  apt -y install sqlite3
-fi
-
-SQLITE3_DB="magenx.db"
-SQLITE3_DB_PATH="${MAGENX_CONFIG_PATH}/${SQLITE3_DB}"
-SQLITE3="sqlite3 ${SQLITE3_DB_PATH}"
-if [ ! -f "${SQLITE3_DB_PATH}" ]; then
-  ${SQLITE3} "" ""
-
-# Create base tables to save configuration
-${SQLITE3} "CREATE TABLE IF NOT EXISTS system(
-   machine_id             text,
-   distro_name            text,
-   distro_version         text,
-   web_stack              text,
-   timezone               text,
-   system_test            text,
-   ssh_port               text,
-   terms                  text,
-   system_update          text,
-   php_version            text,
-   phpmyadmin_password    text,
-   webmin_password        text,
-   mysql_root_password    text,
-   elasticsearch_password text
-   );"
-   
-${SQLITE3} "CREATE TABLE IF NOT EXISTS magento(
-   env                       text,
-   mode                      text,
-   redis_password            text,
-   rabbitmq_password         text,
-   indexer_password          text,
-   version_installed         text,
-   domain                    text,
-   owner                     text,
-   php_user                  text,
-   root_path                 text,
-   database_host             text,
-   database_name             text,
-   database_user             text,
-   database_password         text,
-   admin_login               text,
-   admin_password            text,
-   admin_email               text,
-   locale                    text,
-   admin_path                text,
-   crypt_key                 text,
-   tfa_key                   text,
-   private_ssh_key           text,
-   public_ssh_key            text,
-   github_actions_private_ssh_key    text,
-   github_actions_public_ssh_key     text
-   );"
-   
-${SQLITE3} "CREATE TABLE IF NOT EXISTS menu(
-   lemp        text,
-   magento     text,
-   database    text,
-   install     text,
-   config      text,
-   csf         text,
-   webmin      text
-   );"
-   
-${SQLITE3} "INSERT INTO menu (lemp, magento, database, install, config, csf, webmin)
- VALUES('-', '-', '-', '-', '-', '-', '-');"
-fi
 ###################################################################################
 ###                              CHECK IF WE CAN RUN IT                         ###
 ###################################################################################
@@ -290,8 +164,7 @@ else
 fi
 
 # network is up?
-host1=${MAGENX_BASE}
-host2=github.com
+host1=github.com
 
 RESULT=$(((ping -w3 -c2 ${host1} || ping -w3 -c2 ${host2}) > /dev/null 2>&1) && echo "up" || (echo "down" && exit 1))
 if [[ ${RESULT} == up ]]; then
@@ -308,13 +181,7 @@ fi
 # install packages to run CPU and HDD test
 dpkg-query -l curl time bc bzip2 tar >/dev/null || { echo; echo; apt update -o Acquire::ForceIPv4=true; apt -y install curl time bc bzip2 tar; }
 
-_echo "[?] Install Webmin Control Panel ? [y/n][n]: "
-DOMAIN=$(${SQLITE3} "SELECT domain FROM magento LIMIT 1;")
-OWNER=$(${SQLITE3} "SELECT owner FROM magento LIMIT 1;")
-ADMIN_EMAIL=$(${SQLITE3} "SELECT admin_email FROM magento LIMIT 1;")
-read webmin_install
-if [ "${webmin_install}" == "y" ];then
- echo ""
+
  YELLOWTXT "Webmin installation:"
  echo ""
  curl -s -O https://raw.githubusercontent.com/webmin/webmin/master/setup-repos.sh
@@ -338,7 +205,7 @@ if [ "$?" = 0 ]; then
   
   echo "webmin_${OWNER}:\$1\$84720675\$F08uAAcIMcN8lZNg9D74p1:::::$(date +%s):::0::::" > /etc/webmin/miniserv.users
   sed -i "s/root:/webmin_${OWNER}:/" /etc/webmin/webmin.acl
-  WEBMIN_PASSWORD=$(head -c 500 /dev/urandom | tr -dc 'a-zA-Z0-9@#%^?=+_[]{}()' | fold -w 15 | head -n 1)
+  WEBMIN_PASSWORD=$(head -c 500 /dev/urandom | tr -dc 'a-zA-Z0-9@#%^?=+_[]{}' | fold -w 15 | head -n 1)
   /usr/share/webmin/changepass.pl /etc/webmin/ webmin_${OWNER} "${WEBMIN_PASSWORD}"
   
   systemctl enable webmin
